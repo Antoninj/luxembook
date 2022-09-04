@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "luxembook"
+version = "0.1.0"
+description = "Luxembourg gardens tennis court automated booking system"
+authors = ["Antonin Jousson <antonin@soda.io>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^4.4.3"
+requests = "^2.28.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
