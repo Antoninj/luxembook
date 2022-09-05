@@ -12,6 +12,7 @@ PLANNING_DATE_XPATH = (
     "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/caption/strong"
 )
 LUX_BOOKING_URL = "https://tennis-reservation.resawebfft.com/index.php?option=com_content&view=article&id=35&Itemid=119"
+FREE = "libre"
 
 
 def main(is_dry_run: bool):
@@ -30,7 +31,16 @@ def run():
     date_aware_booking_url = f"{LUX_BOOKING_URL}&temps={booking_date_epoch}"
     chrome_headless_browser.get(date_aware_booking_url)
     login(chrome_headless_browser)
-    check_available_slots(chrome_headless_browser)
+    available_slots = get_available_slots(chrome_headless_browser)
+    available_slots_it = iter(available_slots)
+    try:
+        available_slot = next(available_slots_it)
+        available_slot.click()
+        for handle in chrome_headless_browser.window_handles:
+            typer.echo(f"Handle: {handle}")
+    except StopIteration:
+        typer.echo("No free booking slots")
+        # trigger notification flow
 
 
 def dry_run():
@@ -38,7 +48,7 @@ def dry_run():
     booking_date_epoch = get_booking_date_timestamp()
     date_aware_booking_url = f"{LUX_BOOKING_URL}&temps={booking_date_epoch}"
     chrome_headless_browser.get(date_aware_booking_url)
-    check_available_slots(chrome_headless_browser)
+    get_available_slots(chrome_headless_browser)
 
 
 def setup_chrome_headless_browser():
@@ -64,7 +74,7 @@ def get_booking_date_timestamp():
     return booking_date.timestamp()
 
 
-def check_available_slots(chrome_headless_browser):
+def get_available_slots(chrome_headless_browser):
     planning_date = chrome_headless_browser.find_element(
         By.XPATH,
         PLANNING_DATE_XPATH,
@@ -78,7 +88,8 @@ def check_available_slots(chrome_headless_browser):
         By.XPATH,
         BOOKING_HOUR_XPATH,
     )
-    typer.echo(f"Looking up available booking slots at {booking_hour.text}")
+    typer.echo(f"Looking up available booking slots at {booking_hour.text}...")
+    available_slots = []
     for tennis_court_x_path, booking_slot_x_path in booking_slots_x_paths.items():
         booking_slot = chrome_headless_browser.find_element(
             By.XPATH, booking_slot_x_path
@@ -86,8 +97,12 @@ def check_available_slots(chrome_headless_browser):
         tennis_court = chrome_headless_browser.find_element(
             By.XPATH, tennis_court_x_path
         )
-        typer.echo(f"Checking court [{tennis_court.text}] availability")
-        typer.echo(booking_slot.text)
+        typer.echo(f"Checking court [{tennis_court.text}] availability...")
+        typer.echo(f"Court {tennis_court.text}: {booking_slot.text}")
+        if booking_slot.text == FREE:
+            available_slots.append(booking_slot)
+
+    return available_slots
 
 
 if __name__ == "__main__":
