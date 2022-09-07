@@ -9,9 +9,7 @@ from selenium.webdriver.common.by import By
 
 LUX_BOOKING_URL = "https://tennis-reservation.resawebfft.com/index.php?option=com_content&view=article&id=35&Itemid=119"
 BOOKING_HOUR_XPATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/tbody/tr/td[1]/div[10]"  # 15:00
-PLANNING_DATE_XPATH = (
-    "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/caption/strong"
-)
+PLANNING_DATE_XPATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/caption/strong"
 
 FREE = "libre"
 
@@ -19,9 +17,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(
-            f"logs/luxembook/luxembook_{pendulum.now().strftime('%Y-%m-%d %H:%M:%S')}.log"
-        ),
+        logging.FileHandler(f"logs/luxembook/luxembook_{pendulum.now().strftime('%Y-%m-%d %H:%M:%S')}.log"),
         logging.StreamHandler(),
     ],
 )
