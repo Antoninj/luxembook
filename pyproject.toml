@@ -6,7 +6,7 @@ authors = ["Antonin Jousson <a.jousson@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Antoninj/luxembook"
-keywords = ["booking-automation", "tennis"]
+keywords = ["booking automation", "tennis", "fft"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
