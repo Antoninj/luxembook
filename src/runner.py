@@ -30,6 +30,10 @@ class Runner(ABC):
     def setup_chrome_headless_browser():
         chrome_options = Options()
         chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-dev-tools")
+        chrome_options.add_argument("--no-zygote")
         chrome_options.add_argument("--incognito")
         chrome_headless_browser = Chrome(
             options=chrome_options,
