@@ -2,7 +2,7 @@ import typer
 import pendulum
 import logging
 
-from src.runner import LuxRun, DryRun
+from runner import LuxRun, DryRun
 
 logging.basicConfig(
     level=logging.INFO,
