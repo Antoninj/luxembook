@@ -1,4 +1,4 @@
-# Base image with headless chrome + chromium + chromdriver
+# Base image with headless chrome + chromium + chromedriver
 FROM selenium/standalone-chrome as selenium-python-base
 
 USER root
