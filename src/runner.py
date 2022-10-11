@@ -1,8 +1,9 @@
 import logging
 import os
 from abc import ABC, abstractmethod
-import pendulum
 
+import pendulum
+from selenium.common import WebDriverException
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -10,10 +11,10 @@ from selenium.webdriver.common.by import By
 logger = logging.getLogger(__name__)
 
 # X_PATHS
-BOOKING_HOUR_XPATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/tbody/tr/td[1]/div[10]"  # 15:00
+BOOKING_HOUR_XPATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/tbody/tr/td[1]/div[15]"  # 15:00
 PLANNING_DATE_XPATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/caption/strong"
 TENNIS_COURT_INFO_X_PATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/thead/tr/th[{}]"
-BOOKING_SLOT_X_PATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/tbody/tr/td[{}]/div[10]"
+BOOKING_SLOT_X_PATH = "/html/body/div[3]/div/div/div/main/article/div/div/div[2]/table/tbody/tr/td[{}]/div[15]"
 
 FREE = "libre"
 
@@ -47,8 +48,9 @@ class Runner(ABC):
 
     @staticmethod
     def get_booking_date_timestamp(day_of_week: int):
-        logger.info(f"Current date: {pendulum.now()}")
-        booking_date = pendulum.now().next(day_of_week)
+        current_paris_time = pendulum.now("Europe/Paris")
+        logger.info(f"Current date: {current_paris_time}")
+        booking_date = current_paris_time.next(day_of_week)
         logger.info(f"Booking date: {booking_date}")
         return booking_date.timestamp()
 
@@ -81,40 +83,59 @@ class DryRun(Runner):
     def __init__(self):
         super().__init__()
 
+    @Override
     def run(self):
-        booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
-        date_aware_booking_url = f"{self.LUX_BOOKING_URL}&temps={booking_date_epoch}"
-        self.browser.get(date_aware_booking_url)
-        self._find_available_slots()
+        try:
+            booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
+            date_aware_booking_url = f"{self.LUX_BOOKING_URL}&temps={booking_date_epoch}"
+            self.browser.get(date_aware_booking_url)
+            self._find_available_slots()
+
+        except BaseException as e:
+            logger.error("Error while running luxembook in dry run mode", e)
 
 
 class LuxRun(Runner):
     def __init__(self):
         super().__init__()
 
+    @Override
     def run(self):
-        booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
-        date_aware_booking_url = f"{self.LUX_BOOKING_URL}&temps={booking_date_epoch}"
-        self.browser.get(date_aware_booking_url)
-        self._login()
-        available_slots = self._find_available_slots()
-        self._book_first_available_slot(available_slots)
+        try:
+            booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
+            date_aware_booking_url = f"{self.LUX_BOOKING_URL}&temps={booking_date_epoch}"
+            self.browser.get(date_aware_booking_url)
+            self._login()
+            available_slots = self._find_available_slots()
+            self._book_first_available_slot(available_slots)
+
+        except BaseException as e:
+            logger.error("Error while running luxembook in normal run mode", e)
 
     def _login(self):
-        username = os.environ.get("username", "not_set")
-        password = os.environ.get("password", "not_set")
-        logger.info(f"Logging in with user {username}")
-        self.browser.find_element(By.ID, "modlgn-username").send_keys(username)
-        self.browser.find_element(By.ID, "modlgn-passwd").send_keys(password)
-        self.browser.find_element(By.ID, "form-login").submit()
+        try:
+            username = os.environ.get("username", "not_set")
+            password = os.environ.get("password", "not_set")
+            logger.info(f"Logging in with user {username}")
+            self.browser.find_element(By.ID, "modlgn-username").send_keys(username)
+            self.browser.find_element(By.ID, "modlgn-passwd").send_keys(password)
+            self.browser.find_element(By.ID, "form-login").submit()
+        except WebDriverException as e:
+            logger.error("Error while trying to login", e)
 
     def _book_first_available_slot(self, available_slots):
-        available_slots_it = iter(available_slots)
         try:
-            available_slot = next(available_slots_it)
-            available_slot.click()
-            for handle in self.browser.window_handles:
-                logger.info(f"Handle: {handle}")
+            first_available_slot = next(iter(available_slots))
+            first_available_slot.click().perform()
+            handles = [handle for handle in self.browser.window_handles]
+            booking_dialog_handle = next(iter(handles))
+            logger.debug(f"Booking dialog handle: {booking_dialog_handle}")
+            self.browser.switch_to.window(booking_dialog_handle)
+
         except StopIteration:
-            logger.info("No free booking slots")
-            # trigger failure notification flow
+            logger.warning("No free booking slots")
+
+        except WebDriverException as e:
+            logger.error("Error while trying to book first available slot", e)
+
+    # trigger  notification flow
