@@ -8,7 +8,7 @@ Luxembook is a CLI application that automates the process of booking a tennis co
 the [FFT online booking platform](https://tennis-reservation.resawebfft.com/)
 using [Selenium](https://www.selenium.dev/) web browser automation technology.
 
-## Running locally without Docker (MacOS)
+## Running locally without Docker (macOS)
 
 1. Install dev and runtime dependencies: `poetry install`
 2. Download the [chromedriver executable archive](https://chromedriver.chromium.org/downloads) matching your locally
@@ -16,7 +16,7 @@ using [Selenium](https://www.selenium.dev/) web browser automation technology.
 3. Unzip the chromedriver executable archive and move it to `~/.local/bin`
 4. Set the `username` and ` password`environment variables with your login credentials
 5. Run `python src/luxembook.py true` for dry run mode
-6. If MacOS complains, bypass untrusted software quarantine: `xattr -d com.apple.quarantine chromedriver`
+6. If macOS complains, bypass untrusted software quarantine: `xattr -d com.apple.quarantine chromedriver`
 
 ## Running locally using Docker
 

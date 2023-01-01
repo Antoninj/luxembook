@@ -3,7 +3,7 @@ import logging
 import pendulum
 import typer
 
-from runner import LuxRun, DryRun
+from runner import BookRun, DryRun
 
 logging.basicConfig(
     level=logging.INFO,
@@ -17,13 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 def main(is_dry_run: bool):
-    logger.info("Starting luxembook...")
-    if is_dry_run:
-        logger.info("Luxembook is running in dry run mode")
-        runner = DryRun()
-    else:
-        logger.info(f"Luxembook is running in normal mode")
-        runner = LuxRun()
+    logger.info("Running luxembook")
+    runner = DryRun() if is_dry_run else BookRun()
     runner.run()
 
 
