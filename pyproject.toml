@@ -2,7 +2,7 @@
 name = "luxembook"
 version = "0.1.0"
 description = "Luxembourg gardens tennis court automated booking system"
-authors = ["Antonin Jousson <a.jousson@gmail.com>"]
+authors = ["Antonin Jousson <antonin@jousson.dev>"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/Antoninj/luxembook"

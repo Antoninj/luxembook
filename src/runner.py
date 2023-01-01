@@ -83,7 +83,6 @@ class DryRun(Runner):
     def __init__(self):
         super().__init__()
 
-    @Override
     def run(self):
         try:
             booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
@@ -99,7 +98,6 @@ class LuxRun(Runner):
     def __init__(self):
         super().__init__()
 
-    @Override
     def run(self):
         try:
             booking_date_epoch = self.get_booking_date_timestamp(pendulum.SATURDAY)
